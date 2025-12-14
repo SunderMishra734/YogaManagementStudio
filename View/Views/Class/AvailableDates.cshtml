@@ -1,0 +1,157 @@
+﻿@model IEnumerable<View.Models.Response.AvailableDateDto>
+
+@{
+    ViewData["Title"] = "AvailableDates";
+}
+<h1>Available Dates</h1>
+<div class="modal fade" id="removeDateModal" tabindex="-1" role="dialog" aria-labelledby="removeDateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeDateModalLabel">Remove Date</h5>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Class" asp-action="RemoveAvailableDate" method="post" id="removeAvailableDate">
+                    <p>Start Date: <span id="startDateSpan"></span></p>
+                    <p>End Date: <span id="endDateSpan"></span></p>
+                    <p>Days: <span id="daysSpan"></span></p>
+                    <input type="hidden" id="slotId" name="slotId" />
+                    <p>Are you sure you want to remove this date?</p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger" id="confirmRemoveBtn" form="removeAvailableDate">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-12 mt-5">
+
+    <div class="col-md-12">
+        @*<div class="col-lg-6 col-md-12 col-sm-12 animate-box" data-animate-effect="fadeInUp">
+                <div class="yg-details-block">
+                    <div class="yg-class-box">
+                        <h2>Add new available date</h2>
+                    </div>
+                </div>
+            </div>*@
+        <div class="yg-details-block">
+            <div class="yg-class-box">
+                <h2 class="text-white">Add new available date</h2>
+            </div>
+        </div>
+        @if (ViewBag.AvailableDates != null)
+        {
+            <form asp-controller="Class" asp-action="AddAvailableDate" method="post">
+                @foreach (var availableDate in ViewBag.AvailableDates)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="selectedSlots" value="@availableDate.SlotId" />
+                        <label class="form-check-label" for="@($"checkbox-{availableDate.SlotId}")">
+                            @availableDate.StartTime - @availableDate.EndTime
+                            @if (availableDate.Day != null)
+                            {
+                                var daysBuilder = new System.Text.StringBuilder();
+                                foreach (var day in availableDate.Day)
+                                {
+                                    daysBuilder.Append(day.Day).Append(", ");
+                                }
+                                var daysString = daysBuilder.ToString().TrimEnd(',', ' ');
+                                <span>@daysString</span>
+                            }
+
+                        </label>
+                    </div>
+                }
+                <button type="submit" class="btn btn-success">Add Available Dates</button>
+            </form>
+        }
+    </div>
+
+
+
+
+    <div class="col-md-12">
+        <div class="yg-details-block">
+            <div class="yg-class-box">
+                <h2 class="text-white">Your dates register</h2>
+            </div>
+        </div>
+        @if (Model != null)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.SlotId)
+                        </th>
+                        <th>Start at</th>
+                        <th>End at</th>
+                        <th>On days</th>
+                        <th>Register on</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SlotId)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Slot.StartTime)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Slot.EndTime)
+                            </td>
+                            <td>
+                                @if (item.Slot.Day != null)
+                                {
+                                    var daysBuilder = new System.Text.StringBuilder();
+                                    @foreach (var day in item.Slot.Day)
+                                    {
+                                        daysBuilder.Append(day.Day).Append(", ");
+                                    }
+                                    var daysString = daysBuilder.ToString().TrimEnd(',', ' ');
+                                    <span>@daysString</span>
+                                }
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Date)
+                            </td>
+                            <td class="text-center"><button class="btn-delete"><i class="fas fa-trash user-select-auto "></i></button></td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $(".btn-delete").click(function () {
+                console.log("clicked");
+                var slotId = $(this).closest("tr").find("td:eq(0)").text().trim();
+                var startDate = $(this).closest("tr").find("td:eq(1)").text().trim();
+                var endDate = $(this).closest("tr").find("td:eq(2)").text().trim();
+                var days = $(this).closest("tr").find("td:eq(3)").text().trim();
+
+                $("#startDateSpan").text(startDate);
+                $("#endDateSpan").text(endDate);
+                $("#daysSpan").text(days);
+                $("#slotId").val(slotId);
+
+                $("#removeDateModal").modal("show");
+            });
+        });
+
+    </script>
+}

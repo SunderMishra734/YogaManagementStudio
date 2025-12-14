@@ -1,0 +1,614 @@
+﻿@using System.Globalization
+@using View.Models.Enum
+@using View.Models.Response;
+@using System.Web;
+@model View.Models.PaginatedResult<ClassDto>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string token = ViewBag.MyToken;
+}
+<partial name="_Notification"/>
+<div class="row">
+    <div class="col-md-12">
+        <!-- WELCOME-->
+        <section class="welcome p-t-10">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h1 class="title-4">
+                            Manage Classes
+                        </h1>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- END WELCOME-->
+        <!-- CREATE CLASS WITH SCHEDULE MODAL -->
+        <div class="modal fade overflow-auto" id="myModal" data-backdrop="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Create class</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <form asp-controller="Admin" asp-action="Classes" method="post" id="create-class" enctype="multipart/form-data">
+                        <div class="mb-2 mx-5 text-start  align-items-center justify-content-center">
+                            <div class="mx-2">
+                                <p class="font-weight-bold">Class Name:<p />
+                                <input type="text" id="class-name" name="ClassName" class="form-control ml-3 border" required/>
+                            </div>
+                            <div class="mx-2">
+                                <p class="font-weight-bold">Class Capacity:<p />
+                                <input type="number" min="10" max="50" id="class-capacity" name="ClassCapacity" class="form-control ml-3 border" required/>
+                            </div>
+                            <div class="mx-2">
+                                <p class="font-weight-bold">Price:<p />
+                                <input type="number" min="100000" max="5000000" id="price" name="Price" class="form-control ml-3 border" required/>
+                            </div>
+                            <div class="mx-2">
+                                <p class="font-weight-bold">Description:<p />
+                                <textarea id="description" name="Description" class="form-control ml-3 border" required></textarea>
+                            </div>
+                            <div class="mx-2">
+                                <p class="font-weight-bold">Image:<p />
+                                <input type="file" id="image" name="Image" class="form-control ml-3 border"/>
+                            </div>
+                            <div class="mx-2">
+                                <p class="font-weight-bold">Start Date:<p />
+                                <input type="date" id="start-date" name="StartDate" class="form-control ml-3 border" required/>
+                            </div>
+                            <div class="mx-2">
+                                <p class="font-weight-bold">End Date:<p />
+                                <input type="date" id="end-date" name="EndDate" class="form-control ml-3 border" required/>
+                            </div>
+                            <div class="mx-2">
+                                <p class="font-weight-bold">Select the study slot:<p />
+                                <select id="selectSlot" name="SlotId" required>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" form="create-class">Create class</button>
+                </div>
+
+            </div>
+        </div>
+        </div>
+        <!-- Update modal-->
+        <div class="modal fade overflow-auto" id="updateModal" data-backdrop="false">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal header-->
+              <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Class</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <!-- Modal body-->
+              <div class="modal-body">
+                <!-- Class basic information-->
+                <div id="basicInfoSection">
+                  <h4>Basic Information</h4>
+                  <form id="basicInfoForm">
+                    <input type="hidden" id="update-class-id" name="classId" style="display: none;"/>
+                    <div class="form-group">
+                      <label for="className">Class Name</label>
+                      <input type="text" class="form-control" id="update-class-name" name="className" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="price">Price</label>
+                      <input type="number" min="100000" max="5000000" class="form-control" id="update-price" name="price" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="capacity">Capacity</label>
+                      <input type="number" min="10" max="50" class="form-control" id="update-capacity" name="classCapacity" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="description">Description</label>
+                      <textarea class="form-control" id="update-description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="image">Image</label>
+                      <input type="file" class="form-control-file" id="update-image" name="image">
+                    </div>
+                    <div class="form-group">
+                        <select id="update-class-status" name="classStatus" class="form-control">
+                            <option value="0">Unavailable</option>
+                            <option value="1">Not Started</option>
+                            <option value="2">Started</option>
+                            <option value="3">Ended</option>
+                        </select >
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">Update Info</button>
+                  </form>
+                </div>
+                <hr style="border-top: 3px dashed #999999;">
+                <!-- Lecturer -->
+                <div id="lecturerInfoSection">
+                  <h4>Lecturer Information:</h4>
+                  <form id="lecturerForm">
+                    <h5 id="lecturer-name" class="mt-1 ml-1"></h5>
+                    <h5 class="mt-1 ml-1">Id: <span id="lecturerId" class="font-weight-normal"></span></h5>
+                    <p id="lecturer-email" class="mt-1 ml-1"></p>
+                    <p class="mt-1 text-dark font-weight-bold"> Assign new lecturer: </p>
+                    <input type="hidden" id="assignClassId" name="classId" style="display: none;"/>
+                    <select id="lecturer" name="lecturerId" >
+                        <option value="0">None</option>
+                    </select>
+                    <button type="submit" id="assignLecturerBtn" class="btn btn-outline-success">Assign Lecturer</button>
+                  </form>
+                <hr style="border-top: 3px dashed #999999;">
+                <!--Schedule -->
+                <div id="studySlotsSection">
+                  <h4>Class Schedule</h4>
+                  <table id="schedule" class="table table-striped table-bordered mt-3">
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>Index</th>
+                      <th>Start Time</th>
+                      <th>End Time</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scheduleItem"></tbody>
+                </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    
+
+        <!-- DATA TABLE -->
+        <h3 class="title-5 m-b-35">data table</h3>
+        <!-- Filter/sort -->
+        <div class="table-data__tool">
+            <div class="table-data__tool-left">
+                <!-- Sort by -->
+                <div class="rs-select2--light rs-select2--md">
+                    <select class="js-select2 filter-select" id="sortBySelect">
+                        <option value="">Sort by</option>
+                        <option value="classname">Name (A-Z)</option>
+                        <option value="classname_desc">Name (Z-A)</option>
+                        <option value="price">Price (Low to High)</option>
+                        <option value="price_desc">Price (High to Low)</option>
+                    </select>
+                    <div class="dropDownSelect2"></div>
+                </div>
+                <!-- Filter by startingFromDate -->
+                <div class="rs-select2--light rs-select2--md">
+                    <input type="text" onfocus="(this.type='date')" onblur="(this.type='text')" class="form-control au-input" id="startingFromDateInput" placeholder="Starting From" />
+                </div>
+                <!-- Filter by durationMonths -->
+                <div class="rs-select2--light rs-select2--md">
+                    <input type="number" class="form-control au-input" id="durationMonthsInput" placeholder="Durations" />
+                </div>
+                <!-- Filter by classCapacity -->
+                <div class="rs-select2--light rs-select2--md">
+                    <select class="js-select2 filter-select" id="classCapacitySelect">
+                        <option value="">Class Capacity</option>
+                        <option value="lt15">&lt;15</option>
+                        <option value="15-25">15-25</option>
+                        <option value="gt25">&gt;25</option>
+                    </select>
+                    <div class="dropDownSelect2"></div>
+                </div>
+                <!-- Search -->
+                <form method="get" class="search-form rs-select2--dark" asp-controller="Admin" asp-action="Classes">
+                    <div class="input-group">
+                        <input class="au-input" type="text" name="searchKeyword" placeholder="Search by Class Name" />
+                        <button class="au-btn--submit" type="submit">
+                            <i class="zmdi zmdi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="table-data__tool-right">
+                <button class="au-btn au-btn-icon au-btn--green au-btn--small" data-toggle="modal" data-target="#myModal">
+                    <i class="zmdi zmdi-plus"></i>create new
+                </button>
+            </div>
+        </div>
+        <!-- End filter/sort -->
+        <div class="table-responsive table-responsive-data2">
+            <table class="table table-data2">
+                <thead>
+                    <tr>
+                        <th>Class Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Price</th>
+                        <th>Class Capacity</th>
+                        <th>Lecturer</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var classItem in Model.Items)
+                    {
+                        <tr class="tr-shadow">
+                            <td>@classItem.ClassName</td>
+                            <td>@classItem.StartDate.ToString("MM/dd/yyyy")</td>
+                            <td>@classItem.EndDate.ToString("MM/dd/yyyy")</td>
+                            <td>@classItem.Price.ToString("N0") VND</td>
+                            <td>@classItem.ClassCapacity</td>
+                            <td>@(classItem.Lecturer != null ? classItem.Lecturer.FullName : "N/A")</td>
+                            <td class="class-status text-left font-weight-bold">@(classItem.ClassStatus.HasValue?((Status)classItem.ClassStatus).ToString() : "Unknown")</td>
+                            <td>
+                                <div class="table-data-feature">
+                                    <button class="item edit-class-btn" data-class-id='@classItem.ClassId' data-placement="top" title="Edit">
+                                        <i class="zmdi zmdi-edit"></i>
+                                    </button>
+                                    @*<button class="item" data-toggle="tooltip" data-placement="top" title="Delete">
+                                        <i class="zmdi zmdi-delete"></i>
+                                    </button>*@
+                                    <div class="dropdown">
+                                        @*<button class="item" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="zmdi zmdi-more"></i>
+                                        </button>*@
+                                        @*<div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="@Url.Action("ClassDetails", "Admin", new { classId = classItem.ClassId })">
+                                                View Details
+                                            </a>
+                                        </div>*@
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="spacer"></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!-- PAGING NAVIGATION -->
+        <nav>
+            <ul class="pagination">
+                @if (Model.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@(ViewBag.QueryString)&page=@(Model.Page - 1)">&lt</a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                        <a class="page-link" href="@(ViewBag.QueryString)&page=@i">@i</a>
+                    </li>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@(ViewBag.QueryString)&page=@(Model.Page + 1)">&gt</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+        <!-- END PAGING NAVIGATION -->
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var searchKeywordParam = '@Context.Request.Query["searchKeyword"]';
+        var sortByParam = '@Context.Request.Query["sortBy"]';
+        var startingFromDateParam = '@Context.Request.Query["startingFromDate"]';
+        var durationMonthsParam = '@Context.Request.Query["durationMonths"]';
+        var classCapacityParam = '@Context.Request.Query["classCapacity"]';
+
+        if (sortByParam) {
+            $('#sortBySelect').val(sortByParam).trigger('change');
+        }
+
+        if (startingFromDateParam) {
+            $('#startingFromDateInput').val(startingFromDateParam);
+        }
+
+        if (durationMonthsParam) {
+            $('#durationMonthsInput').val(durationMonthsParam);
+        }
+
+        if (classCapacityParam) {
+            $('#classCapacitySelect').val(classCapacityParam).trigger('change');
+        }
+
+        if (searchKeywordParam) {
+            $('[name="searchKeyword"]').val(searchKeywordParam);
+        }
+
+        $('#sortBySelect, #startingFromDateInput, #durationMonthsInput, #classCapacitySelect').change(function () {
+            applyFilters();
+        });
+
+        function applyFilters() {
+            var sortBy = $('#sortBySelect').val();
+            var startingFromDate = $('#startingFromDateInput').val();
+            var durationMonths = $('#durationMonthsInput').val();
+            var classCapacity = $('#classCapacitySelect').val();
+            var searchKeyword = $('[name="searchKeyword"]').val();
+
+            var url = '@Url.Action("Classes", "Admin")';
+
+            var params = [];
+            if (sortBy) {
+                params.push('sortBy=' + sortBy);
+            }
+            if (startingFromDate) {
+                params.push('startingFromDate=' + startingFromDate);
+            }
+            if (durationMonths) {
+                params.push('durationMonths=' + durationMonths);
+            }
+            if (classCapacity) {
+                params.push('classCapacity=' + classCapacity);
+            }
+            if (searchKeyword) {
+                params.push('searchKeyword=' + encodeURIComponent(searchKeyword));
+            }
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            window.location.href = url;
+        }
+        //date validator
+        $(document).ready(function() {
+        $('#start-date').on('change', function() {
+        var startDate = new Date($(this).val());
+        var endDateInput = $('#end-date');
+        if (startDate) {
+            startDate.setDate(startDate.getDate() + 1); // Add one day to start date
+            endDateInput.attr('min', startDate.toISOString().split('T')[0]);
+        } else {
+            endDateInput.attr('min', null); // Remove the minimum constraint
+        }
+        });
+
+        $('#end-date').on('change', function() {
+            var endDate = new Date($(this).val());
+            var startDateInput = $('#start-date');
+            if (endDate) {
+                endDate.setDate(endDate.getDate() - 1); // Subtract one day from end date
+                startDateInput.attr('max', endDate.toISOString().split('T')[0]);
+            } else {
+                startDateInput.attr('max', null); // Remove the maximum constraint
+            }
+        });
+    });
+        //input number validator
+          $('#class-capacity').on('change', function() {
+            var value = $(this).val();
+            var min = parseFloat($(this).attr('min'));
+            var max = parseFloat($(this).attr('max'));
+
+            if (value < min) {
+              $(this).val(min);
+            } else if (value > max) {
+              $(this).val(max);
+            }
+          });                                                      
+          $('#price').on('change', function() {
+            var value = $(this).val();
+            var min = parseFloat($(this).attr('min'));
+            var max = parseFloat($(this).attr('max'));
+
+            if (value < min) {
+              $(this).val(min);
+            } else if (value > max) {
+              $(this).val(max);
+            }
+          });
+        //Style with status
+        $('.class-status').each(function(index, element) {
+            switch($(element).text()){
+                case 'NotStarted': $(element).addClass('text-warning'); break;
+                case 'Started': $(element).addClass('text-primary'); break;
+                case 'Ended': $(element).addClass('text-success'); break;
+                default: $(element).addClass('text-secondary'); break;
+            };
+        });
+        //fetch study slot
+        $.ajax({
+              url: 'https://localhost:7243/api/Class/slot',
+          method: 'GET',
+          dataType: 'json',
+          headers: {
+            'Authorization': 'Bearer ' + '@token'
+          },
+          success: function(data) {
+            const selectSlot = $('#selectSlot');
+            console.log(data.result);
+            // Loop through the sections and create options with custom content
+            $.each(data.result, function(index, slot) {
+                //days of slot
+                const days = slot.day.map(item => item.day);
+                const str = days.join(",");
+              // Create an option element with custom content
+              const option = $('<option></option>')
+                .attr('value', slot.slotId)
+                .html('<strong>' + slot.startTime + " - " + slot.endTime + '</strong>: ' + str);
+
+              // Append the option to the select element
+              selectSlot.append(option);
+            });
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            console.log('Error fetching study slots:', errorThrown);
+          }
+        });
+        //fetch lecturer list
+        $.ajax({
+              url: 'https://localhost:7243/api/User?RoleId=2',
+          method: 'GET',
+          dataType: 'json',
+          headers: {
+            'Authorization': 'Bearer ' + '@token'
+          },
+          success: function(data) {
+            const select = $('#lecturer');
+            console.log(data.result);
+            // Loop through the sections and create options with custom content
+            $.each(data.result.items, function(index, lec) {
+              // Create an option element with custom content
+              const option = $('<option></option>')
+                .attr('value', lec.uid)
+                .html('<strong>' + lec.fullName + '</strong> ');
+              // Append the option to the select element
+              select.append(option);
+            });
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            console.log('Error fetching lecturers:', errorThrown);
+          }
+        });
+
+        $('.edit-class-btn').on('click', function() {
+            var classId = $(this).data('class-id');
+            openUpdateModal(classId);
+        });
+
+        $('#basicInfoForm').on('submit', function(event) {
+          event.preventDefault();
+          var formData = new FormData(this);
+          updateBasicInfo(formData);
+        }); 
+        
+        $('#lecturerForm').on('submit', function(event) {
+          event.preventDefault();
+          var formData = $(this).serializeArray();
+          assignLecturer(formData);
+        }); 
+
+        //$('#assignLecturerBtn').on('click', function() {
+        //    var classId = $('#assignClassId').val();
+        //    var lecturerId = $('#lecturer').val();
+        //    assignLecturer(lecturerId,classId);
+        //});
+
+
+
+    });
+        //fetch data for update modal
+        function openUpdateModal(classId) {
+            $.ajax({
+                    url: 'https://localhost:7243/api/Class/' + classId,
+                method: 'GET',
+                dataType: 'json',
+                headers: {
+                    'Authorization': 'Bearer ' + '@token'
+                },    
+                success: function(data) {
+                    // Populate basic information section
+                    $('#update-class-id').val(data.result.classId);
+                    $('#update-class-name').val(data.result.className);
+                    $('#update-price').val(data.result.price);
+                    $('#update-capacity').val(data.result.classCapacity);
+                    $('#update-description').val(data.result.description);
+                    $('#update-class-status').val(data.result.classStatus);
+                    $('#assignClassId').val(data.result.classId);
+
+                    // Populate lecturer information
+                    if(data.result.lecturer != null){
+                    $('#lecturer').val(data.result.lecturer.uid);
+                    $('#lecturerId').text(data.result.lecturer.uid);
+                    $('#lecturer-name').text(data.result.lecturer.fullName);
+                    $('#lecturer-email').html("<span class=\"font-weight-bold text-dark\">Email: </span>"+data.result.lecturer.email);
+                    }
+                    
+                    //Populate schedule list
+                    var tableHTML = '';
+                    data.result.schedules.forEach(function(item, index) {
+                        //format date
+                        var date = new Date(item.date).toLocaleDateString(undefined,{
+                            weekday: 'long',
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        })
+                        tableHTML += '<tr>';
+                        tableHTML += '<td>' + ++index + '</td>';
+                        tableHTML += '<td>' + item.slot.startTime + '</td>';
+                        tableHTML += '<td>' + item.slot.endTime + '</td>';
+                        tableHTML += '<td>' + date+ '</td>';
+                        tableHTML += '</tr>';
+                    });
+                    $('#scheduleItem').html(tableHTML);
+                    //show the modal
+                    $('#updateModal').modal('show');
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log('Error fetching class data:', errorThrown);
+                    alert("Fail to get the class detail");
+                }
+            });
+        }
+
+        function assignLecturer(formData) {
+            var formDataJSON = {};
+            $.each(formData, function() {
+                formDataJSON[this.name] = this.value;
+            });
+            formDataJSON['token'] = '@token';
+            $.ajax({
+                  url: 'https://localhost:7243/api/Class/assignLecturer',
+              method: 'POST',
+              contentType: 'application/json',
+              headers: {
+                    'Authorization': 'Bearer ' + '@token'
+              },
+              data: JSON.stringify(formDataJSON),
+              success: function(response) {
+                console.log('Lecturer assigned successfully');
+                location.reload();
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error assigning lecturer:', errorThrown);
+                alert(jqXHR.responseText || 'Fail to assign the lecturer! Make sure that the lecturer is available for the slot and not currently assigned to the slot.');
+              }
+            });
+          }
+
+          function updateBasicInfo(formData) {
+            formData.append('token','@token');
+            console.log(formData);
+            $.ajax({
+                  url: 'https://localhost:7243/api/Class/',
+              method: 'PUT',
+              data: formData,
+              processData: false,
+              contentType: false,
+              headers: {
+                    'Authorization': 'Bearer ' + '@token'
+              },
+              success: function(response) {
+                console.log('Basic info updated successfully');
+                $('#updateModal').modal('hide');
+                location.reload();
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error updating basic info:', errorThrown);
+                //$('#updateModal').modal('hide');
+                alert(jqXHR.responseText || 'Fail to update the information!');
+              }
+            });
+          }
+</script>
+}

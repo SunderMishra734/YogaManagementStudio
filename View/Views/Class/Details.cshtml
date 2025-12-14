@@ -1,0 +1,251 @@
+﻿@using View.Models.Enum
+@using Microsoft.AspNetCore.Http
+@model View.Models.Response.ClassDto
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Img Section -->
+<div class="yg-img-section">
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div class="yg-image-container">
+                <img src="@Model.Image" class="img-fluid" data-animate-effect="fadeInUp" alt="">
+            </div>
+            <div class="yg-slider-caption">
+                <div class="yg-class-title" data-animate-effect="fadeInUp">@Model.ClassName</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- About The Class -->
+<div class="yg-description-section">
+    <div class="container">
+        @if (Model.ClassStatus == 1)
+        {
+            <div class="modal fade" id="enrollModal" tabindex="-1" role="dialog" aria-labelledby="enrollModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="enrollModalLabel">Class Information</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form id="enrollForm" asp-controller="Class" asp-action="Enroll" method="POST">
+                            <div class="modal-body">
+                                <h4>Class Name: @Model.ClassName</h4>
+                                <p>Price: @Model.Price.ToString("N0")</p>
+                                <p>Start Time: @Model.StartDate.ToString("dd/MM/yyyy")</p>
+                                <p>End Time: @Model.EndDate.ToString("dd/MM/yyyy")</p>
+                                <input type="hidden" name="classId" value="@Model.ClassId" />
+                                <input type="hidden" class="form-control" id="amount" name="amount" value="@Model.Price" />
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Enroll</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        }
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12 d-flex justify-content-between align-items-center mb-3" data-animate-effect="fadeInUp">
+                <h1>About The Class</h1>
+                @if (Model.ClassStatus == 1 && Context.Request.Cookies["Role"] == "User")
+                {
+                    bool isEnrolled = false; // Flag to track enrollment status
+                    int studentId = 0; // Replace with the actual logic to retrieve the student ID
+
+                    if (Context.Request.Cookies["Id"] != null && int.TryParse(Context.Request.Cookies["Id"], out int currentStudentId))
+                    {
+                        // Check if the current student ID exists in the class's list of students
+                        isEnrolled = Model.Students.Any(s => s.Uid == currentStudentId);
+                        studentId = currentStudentId;
+                    }
+
+                    if (isEnrolled)
+                    {
+                        <a class="btn btn-outline-success pl-3" asp-action="StudyingClassesById" asp-controller="Class" asp-route-classId="@Model.ClassId">View class</a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-success pl-3" data-toggle="modal" data-target="#enrollModal">Enroll class</button>
+                    }
+                }
+                else if (Model.ClassStatus == 2 && Context.Request.Cookies["Role"] == "User")
+                {
+                    bool isEnrolled = false; // Flag to track enrollment status
+                    int studentId = 0; // Replace with the actual logic to retrieve the student ID
+
+                    if (Context.Request.Cookies["Id"] != null && int.TryParse(Context.Request.Cookies["Id"], out int currentStudentId))
+                    {
+                        // Check if the current student ID exists in the class's list of students
+                        isEnrolled = Model.Students.Any(s => s.Uid == currentStudentId);
+                        studentId = currentStudentId;
+                    }
+
+                    if (isEnrolled)
+                    {
+                        <a class="btn btn-outline-success pl-3" asp-action="StudyingClassesById" asp-controller="Class" asp-route-classId="@Model.ClassId">View class</a>
+                    }
+                    else
+                    {
+                        <span class="text-danger">Class on started</span>
+                    }
+                }
+                else if (Model.ClassStatus == 3)
+                {
+                    <span class="text-danger">Class has ended</span>
+                }
+
+
+            </div>
+            <div class="col-md-8 col-sm-12" data-animate-effect="fadeInUp">
+                <p>@Model.Description</p>
+                <br />
+                <!-- Trainer -->
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <div class="yg-class-trainer"><img src="~/images/trainer/staff03.jpg" class="img-fluid" alt=""></div>
+                    </div>
+                    <div class="col-md-8 col-sm-8">
+                        <div class="yg-class-trainer-content">
+                            @if (Model.Lecturer != null)
+                            {
+                                <h3>
+                                    <span>@Model.Lecturer.FullName</span> — <span>LECTURER</span>
+                                </h3>
+                            }
+                            else
+                            {
+                                <h3>N/A — <span>LECTURER</span></h3>
+                            }
+                            <p>I am a passionate yoga lecturer dedicated to guiding individuals on their transformative journey through the practice of yoga. With years of experience and a deep understanding of various yoga styles, I strive to create a nurturing and uplifting environment in my classes.</p>
+                            <span class="yg-social-icon ti-facebook"></span>
+                            <span class="yg-social-icon ti-instagram"></span>
+                            <span class="yg-social-icon ti-twitter"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Class Details & Class Hours -->
+            <div class="col-md-4 col-sm-12">
+                <div class="yg-class-box" data-animate-effect="fadeInUp">
+                    <h3>Class Details</h3>
+                    <div class="yg-class-table">
+                        <ul>
+                            <li> <span class="yg-class-table-light-text"><i class="ti-tag"></i>Price</span> <span>@Model.Price.ToString("N0") VND</span> </li>
+                            <li>
+                                <span class="yg-class-table-light-text"><i class="ti-user"></i>Trainer</span>
+                                @if (Model.Lecturer != null)
+                                {
+                                    <span>@Model.Lecturer.FullName</span>
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            </li>
+                            <li> <span class="yg-class-table-light-text"><i class="ti-user"></i>Members</span> <span>@Model.Students.Count / @Model.ClassCapacity</span> </li>
+                            <li> <span class="yg-class-table-light-text"><i class="ti-calendar"></i>Start Date</span> <span>@Model.StartDate.ToString("MMMM dd, yyyy")</span> </li>
+                            <li>
+                                <span class="yg-class-table-light-text"><i class="ti-time"></i>Length</span>
+                                @{
+                                    TimeSpan length = Model.EndDate - Model.StartDate;
+                                    int lengthInDays = length.Days;
+                                    int lengthInMonths = lengthInDays >= 30 ? lengthInDays / 30 : lengthInDays;
+                                }
+                                <span>@(lengthInDays >= 30 ? lengthInMonths + " Month(s)" : lengthInDays + " Day(s)")</span>
+                            </li>
+
+
+                            <li>
+                                <span class="yg-class-table-light-text"><i class="ti-stats-up"></i>Status</span>
+                                @if (Model.ClassStatus == 1)
+                                {
+                                    <span>Not Started</span>
+                                }
+                                else if (Model.ClassStatus == 2)
+                                {
+                                    <span>Started</span>
+                                }
+                                else if (Model.ClassStatus == 3)
+                                {
+                                    <span>Ended</span>
+                                }
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+                <!-- Class Hours -->
+                <div class="yg-class-box" data-animate-effect="fadeInUp">
+                    <h3>Class Hours</h3>
+                    <div class="yg-class-table">
+                        <ul>
+                            @if (Model.Schedules != null)
+                            {
+                                var groupedSchedules = Model.Schedules
+                                .GroupBy(s => new { Day = s.Date.DayOfWeek, SlotId = s.SlotId })
+                                .OrderBy(g => g.Key.Day)
+                                .Select(g => new { Day = g.Key.Day, Schedules = g.ToList() });
+
+                                foreach (var group in groupedSchedules)
+                                {
+                                    var day = group.Day;
+                                    var slot = group.Schedules.First().Slot;
+                                    <li>
+                                        <span class="yg-class-table-light-text">@day</span>
+                                        <span>@slot.StartTime.ToString("hh\\:mm") - @slot.EndTime.ToString("hh\\:mm")</span>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonial Section -->
+<div class="yg-testimonial-section-first">
+    <div class="container yg-container-full">
+        <div class="row yg-gutter-0">
+            <div class="col-md-7 col-sm-12" data-animate-effect="fadeInLeft">
+                <div class=""> <img src="~/images/testimonial.jpg" class="img-fluid" alt=""> </div>
+            </div>
+            <div class="col-md-5 col-sm-12" data-animate-effect="fadeInRight">
+                <div class="yg-text-block yg-text-block-h700">
+                    <div class="yg-text-block-center yg-text-block-w60">
+                        <div class="yg-testimonial-section-first-title">"Great teacher, great environment, great energy. Awesome specials for new yogis."</div>
+                        <div class="yg-testimonial-section-first-subtitle">— Lee Buoy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .yg-class-title {
+        font-size: 60px;
+        line-height: 1.5em;
+        font-weight: 400;
+        margin-bottom: 10px;
+        color: #fff;
+        padding: 0 20px;
+        font-family: 'Oswald', sans-serif;
+        text-transform: uppercase;
+    }
+
+    .yg-image-container {
+        height: 100vh;
+        overflow: hidden;
+    }
+</style>
