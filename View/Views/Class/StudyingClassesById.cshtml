@@ -87,7 +87,8 @@
                                                 @item.Slot.StartTime.ToString(@"hh\:mm") - @item.Slot.EndTime.ToString(@"hh\:mm")<br />
                                                 @if (@Model.Lecturer != null)
                                                 {
-                                                    <i class="ti-user"></i> @Model.Lecturer.FullName
+                                                    <i class="ti-user"></i> 
+                                                    @Model.Lecturer.FullName
                                                 }
                                             </td>
                                         }
@@ -148,12 +149,9 @@
                                 <div id="classList">
                                     <!-- Class list will be dynamically populated here -->
                                 </div>
-                                <button type="submit" class="btn btn-success" @if (changeClassList == null || changeClassList.Count == 0) {
-                            <text> disabled</text>
- }>Submit</button>
+                                <button type="submit" class="btn btn-success" @if (changeClassList == null || changeClassList.Count == 0) {<text> disabled</text>}>Submit</button>
                             </form>
                         }
-
                     </div>
                 </div>
             </div>
@@ -299,33 +297,33 @@
         @if (changeClassList != null || changeClassList.Count != 0)
         {
 
-            foreach (var classDto in changeClassList)
-            {
-                <text>
-                                                                        var classId = @classDto.ClassId;
-                        var className = '@classDto.ClassName';
-                        var imageUrl = '@classDto.Image';
+                foreach (var classDto in changeClassList)
+                {
+                        <text>
+                                                                                var classId = @classDto.ClassId;
+                                var className = '@classDto.ClassName';
+                                var imageUrl = '@classDto.Image';
 
-                        var listItem = '<div class="class-item">' +
-                            '<div class="class-info">' +
-                            '<a href="https://localhost:7274/class/details/' + classId + '">' +
-                            '<img src="' + imageUrl + '" alt="' + className + '">' +
-                            '<span class="class-name">' + className + '</span>' +
-                            '</a>' +
-                            '</div>' +
-                            '<input type="radio" name="toClassId" value="' + classId + '">' +
-                            '<input type="hidden" name="fromClassId" value="' + @Model.ClassId + '"/>' +
-                            '</div>';
+                                var listItem = '<div class="class-item">' +
+                                    '<div class="class-info">' +
+                                    '<a href="https://localhost:7274/class/details/' + classId + '">' +
+                                    '<img src="' + imageUrl + '" alt="' + className + '">' +
+                                    '<span class="class-name">' + className + '</span>' +
+                                    '</a>' +
+                                    '</div>' +
+                                    '<input type="radio" name="toClassId" value="' + classId + '">' +
+                                    '<input type="hidden" name="fromClassId" value="' + @Model.ClassId + '"/>' +
+                                    '</div>';
 
-                        $("#classList").append(listItem);
-                </text>
-            }
+                                $("#classList").append(listItem);
+                        </text>
+                }
         }
         else
         {
-            <text>
-                        $("#classList").append('<p>*No class with the same progress for changing</p>');
-            </text>
+                <text>
+                            $("#classList").append('<p>*No class with the same progress for changing</p>');
+                </text>
         }
                     // Show the modal
                     $("#changeClassModal").modal("show");
@@ -334,71 +332,71 @@
     </script>
 
 }
-    <script>
-        // Get the current URL
-        var currentURL = window.location.href;
+<script>
+    // Get the current URL
+    var currentURL = window.location.href;
 
-        // Extract the value of the 's' variable from the URL
-        var urlParams = new URLSearchParams(currentURL);
-        var sValue = urlParams.get('s');
+    // Extract the value of the 's' variable from the URL
+    var urlParams = new URLSearchParams(currentURL);
+    var sValue = urlParams.get('s');
 
-        // Check if the 's' value is not present or not a number, default it to 0
-        var s = isNaN(parseInt(sValue)) ? 0 : parseInt(sValue);
+    // Check if the 's' value is not present or not a number, default it to 0
+    var s = isNaN(parseInt(sValue)) ? 0 : parseInt(sValue);
 
-        // Increment the 's' value by 1
-        var incrementedS = s + 1;
+    // Increment the 's' value by 1
+    var incrementedS = s + 1;
 
-        // Update the URL for the 'Next week' link with the incremented 's' value
-        var nextWeekURL = currentURL;
-        if (sValue) {
-            nextWeekURL = nextWeekURL.replace('s=' + sValue, 's=' + incrementedS);
-        } else {
-            nextWeekURL += nextWeekURL.includes('?') ? '&s=' + incrementedS : '?s=' + incrementedS;
-        }
-        document.getElementById('nextWeekLink').setAttribute('href', nextWeekURL);
-    </script>
+    // Update the URL for the 'Next week' link with the incremented 's' value
+    var nextWeekURL = currentURL;
+    if (sValue) {
+        nextWeekURL = nextWeekURL.replace('s=' + sValue, 's=' + incrementedS);
+    } else {
+        nextWeekURL += nextWeekURL.includes('?') ? '&s=' + incrementedS : '?s=' + incrementedS;
+    }
+    document.getElementById('nextWeekLink').setAttribute('href', nextWeekURL);
+</script>
 
-    <script>
-        // Get the current URL
-        var currentURL = window.location.href;
+<script>
+    // Get the current URL
+    var currentURL = window.location.href;
 
-        // Extract the value of the 's' variable from the URL
-        var urlParams = new URLSearchParams(currentURL);
-        var sValue = urlParams.get('s');
+    // Extract the value of the 's' variable from the URL
+    var urlParams = new URLSearchParams(currentURL);
+    var sValue = urlParams.get('s');
 
-        // Check if the 's' value is not present or not a number, default it to 0
-        var s = isNaN(parseInt(sValue)) ? 0 : parseInt(sValue);
+    // Check if the 's' value is not present or not a number, default it to 0
+    var s = isNaN(parseInt(sValue)) ? 0 : parseInt(sValue);
 
-        // Reduce the 's' value by 1
-        var reducedS = s - 1;
+    // Reduce the 's' value by 1
+    var reducedS = s - 1;
 
-        // Update the URL for the 'Previous week' link with the reduced 's' value
-        var previousWeekURL = currentURL;
-        if (sValue) {
-            previousWeekURL = previousWeekURL.replace('s=' + sValue, 's=' + reducedS);
-        } else {
-            previousWeekURL += previousWeekURL.includes('?') ? '&s=' + reducedS : '?s=' + reducedS;
-        }
-        document.getElementById('previousWeekLink').setAttribute('href', previousWeekURL);
-    </script>
-    <style>
-        .yg-class-title {
-            font-size: 60px;
-            line-height: 1.5em;
-            font-weight: 400;
-            margin-bottom: 10px;
-            color: #fff;
-            padding: 0 20px;
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
-        }
+    // Update the URL for the 'Previous week' link with the reduced 's' value
+    var previousWeekURL = currentURL;
+    if (sValue) {
+        previousWeekURL = previousWeekURL.replace('s=' + sValue, 's=' + reducedS);
+    } else {
+        previousWeekURL += previousWeekURL.includes('?') ? '&s=' + reducedS : '?s=' + reducedS;
+    }
+    document.getElementById('previousWeekLink').setAttribute('href', previousWeekURL);
+</script>
+<style>
+    .yg-class-title {
+        font-size: 60px;
+        line-height: 1.5em;
+        font-weight: 400;
+        margin-bottom: 10px;
+        color: #fff;
+        padding: 0 20px;
+        font-family: 'Oswald', sans-serif;
+        text-transform: uppercase;
+    }
 
-        .yg-image-container {
-            height: 100vh;
-            overflow: hidden;
-        }
+    .yg-image-container {
+        height: 100vh;
+        overflow: hidden;
+    }
 
-        .yg-schedule-section {
-            padding-bottom: 0;
-        }
-    </style>
+    .yg-schedule-section {
+        padding-bottom: 0;
+    }
+</style>

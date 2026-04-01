@@ -24,9 +24,6 @@
                     <form method="get" class="search-form rs-select2--dark" asp-controller="Class" asp-action="Index">
                         <div class="input-group">
                             <input class="au-input" type="text" name="searchKeyword" placeholder="Search by Class Name" />
-                            @*<button class="au-btn--submit" type="submit">
-                                <i class="zmdi zmdi-search"></i>
-                                </button>*@
                         </div>
                     </form>
 
@@ -105,24 +102,27 @@
             <!-- PAGING NAVIGATION -->
             <nav class="text-center">
                 <ul class="pagination justify-content-center">
-                    @if (Model.HasPreviousPage)
+                    @if (Model != null)
                     {
-                        <li class="page-item">
-                            <a class="page-link" href="@(ViewBag.QueryString)&page=@(Model.Page - 1)">&lt;</a>
-                        </li>
-                    }
+                        @if (Model.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@(ViewBag.QueryString)&page=@(Model.Page - 1)">&lt;</a>
+                            </li>
+                        }
 
-                    @for (int i = 1; i <= Model.TotalPages; i++)
-                    {
-                        <li class="page-item @(i == Model.Page ? "active" : "")">
-                            <a class="page-link" href="@(ViewBag.QueryString)&page=@i">@i</a>
-                        </li>
-                    }
-                    @if (Model.HasNextPage)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="@(ViewBag.QueryString)&page=@(Model.Page + 1)">&gt;</a>
-                        </li>
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                <a class="page-link" href="@(ViewBag.QueryString)&page=@i">@i</a>
+                            </li>
+                        }
+                        @if (Model.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@(ViewBag.QueryString)&page=@(Model.Page + 1)">&gt;</a>
+                            </li>
+                        }
                     }
                 </ul>
             </nav>

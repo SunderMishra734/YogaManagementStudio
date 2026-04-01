@@ -19,10 +19,6 @@
     </div>
 </section>
 <div class="table-responsive m-b-40" style="font-weight: 500">
-    @*<form asp-controller="Admin" asp-action="UpdateApprovalStatus" method="post" id="update-form">
-        <input type="hidden" id="requestId" name="requestId" />
-        <input type="hidden" id="isApproved" name="isApproved" />*@
-
     <table class="table table-borderless table-data3">
         <thead>
             <tr>
@@ -30,7 +26,7 @@
                     @Html.DisplayNameFor(model => model.RequestId)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.User.Email)
+                    @Html.DisplayNameFor(model => model.User!.Email)
                 </th>
                 <th>
                     From class
@@ -58,16 +54,16 @@
                             @Html.DisplayFor(modelItem => item.RequestId)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.User.Email)
+                            @Html.DisplayFor(modelItem => item.User!.Email)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.Class.ClassName)
+                            @Html.DisplayFor(modelItem => item.Class!.ClassName)
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Content)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.RequestClass.ClassName)
+                            @Html.DisplayFor(modelItem => item.RequestClass!.ClassName)
                         </td>
                         <td>
                             @if (item.IsApproved == -1)
@@ -90,7 +86,6 @@
 
         </tbody>
     </table>
-    @*</form>*@
 </div>
 
 <!-- Modal -->
@@ -120,7 +115,7 @@
     </div>
 </div>
 
-@section Scripts{
+@section Scripts {
     <script>
         $(document).ready(function () {
             $('.accept-btn, .deny-btn').click(function (e) {
@@ -159,8 +154,5 @@
             });
         });
     </script>
-
-
-
 }
 

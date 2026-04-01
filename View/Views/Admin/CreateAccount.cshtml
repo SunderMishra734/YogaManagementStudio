@@ -1,11 +1,8 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var role = ViewBag.Role as string;
 }
-<partial name="_Notification"/>
+<partial name="_Notification" />
 <div class="">
     <div class="col-lg-8">
         <div class="card">
@@ -68,7 +65,7 @@
                             <label class=" form-control-label">Role</label>
                         </div>
                         <div class="col col-md-9">
-                            @if (role.Equals("Staff"))
+                            @if (role!.Equals("Staff"))
                             {
                                 <div class="radio">
                                     <label for="Role" class="form-check-label">

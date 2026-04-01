@@ -258,81 +258,113 @@
     </div>
 </div>
 <!-- End disable modal -->
-@section Scripts{
-<script>
-    $(document).ready(function () {
-        var searchKeywordParam = '@Context.Request.Query["searchKeyword"]';
-        var roleIdParam = '@Context.Request.Query["roleId"]';
-        var statusParam = '@Context.Request.Query["isDisabled"]';
-        var sortParam = '@Context.Request.Query["sortBy"]';
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var searchKeywordParam = '@Context.Request.Query["searchKeyword"]';
+            var roleIdParam = '@Context.Request.Query["roleId"]';
+            var statusParam = '@Context.Request.Query["isDisabled"]';
+            var sortParam = '@Context.Request.Query["sortBy"]';
 
-        if (roleIdParam) {
-            $('#roleIdSelect').val(roleIdParam).trigger('change');
-        }
-
-        if (statusParam) {
-            $('#statusSelect').val(statusParam).trigger('change');
-        }
-
-        if (sortParam) {
-            $('#sortByNameSelect').val(sortParam).trigger('change');
-        }
-
-        if (searchKeywordParam) {
-            $('[name="searchKeyword"]').val(searchKeywordParam);
-        }
-
-        $('#roleIdSelect, #statusSelect, #sortByNameSelect').change(function () {
-            applyFilters();
-        });
-
-        function applyFilters() {
-            var roleId = $('#roleIdSelect').val();
-            var status = $('#statusSelect').val();
-            var sortBy = $('#sortByNameSelect').val();
-            var searchKeyword = $('[name="searchKeyword"]').val();
-
-            var url = '@Url.Action("Users", "Admin")';
-
-            var params = [];
-            if (roleId) {
-                params.push('roleId=' + roleId);
-            }
-            if (status) {
-                params.push('isDisabled=' + status);
-            }
-            if (sortBy) {
-                params.push('sortBy=' + sortBy);
-            }
-            if (searchKeyword) {
-                params.push('searchKeyword=' + encodeURIComponent(searchKeyword));
+            if (roleIdParam) {
+                $('#roleIdSelect').val(roleIdParam).trigger('change');
             }
 
-            if (params.length > 0) {
-                url += '?' + params.join('&');
+            if (statusParam) {
+                $('#statusSelect').val(statusParam).trigger('change');
             }
 
-            window.location.href = url;
-        }
+            if (sortParam) {
+                $('#sortByNameSelect').val(sortParam).trigger('change');
+            }
 
-        $('.disable-user').click(function () {
+            if (searchKeywordParam) {
+                $('[name="searchKeyword"]').val(searchKeywordParam);
+            }
+
+            $('#roleIdSelect, #statusSelect, #sortByNameSelect').change(function () {
+                applyFilters();
+            });
+
+            function applyFilters() {
+                var roleId = $('#roleIdSelect').val();
+                var status = $('#statusSelect').val();
+                var sortBy = $('#sortByNameSelect').val();
+                var searchKeyword = $('[name="searchKeyword"]').val();
+
+                var url = '@Url.Action("Users", "Admin")';
+
+                var params = [];
+                if (roleId) {
+                    params.push('roleId=' + roleId);
+                }
+                if (status) {
+                    params.push('isDisabled=' + status);
+                }
+                if (sortBy) {
+                    params.push('sortBy=' + sortBy);
+                }
+                if (searchKeyword) {
+                    params.push('searchKeyword=' + encodeURIComponent(searchKeyword));
+                }
+
+                if (params.length > 0) {
+                    url += '?' + params.join('&');
+                }
+
+                window.location.href = url;
+            }
+
+            $('.disable-user').click(function () {
+                var userId = $(this).data('user-id');
+                $('#disable-user-id').val(userId);
+                $('#disableModal').modal('show');
+            });
+
+            $('#disable-user-btn').click(function () {
+                var userId = $('#disable-user-id').val();
+                var reason = $('#disable-reason').val();
+                disableUser(userId, reason);
+            });
+
+            function disableUser(userId, reason) {
+                var form = $('<form>').attr({
+                    method: 'post',
+                    action: '/Admin/DisableUser',
+                    style: 'display: none;'
+            });
+
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'userId',
+                    value: userId
+                }).appendTo(form);
+
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'reason',
+                    value: reason
+                }).appendTo(form);
+
+                form.appendTo('body').submit();
+            }
+
+            $('.enable-user').click(function () {
             var userId = $(this).data('user-id');
-            $('#disable-user-id').val(userId);
-            $('#disableModal').modal('show');
-        });
+            $('#enableUserBtn').attr('data-user-id', userId);
+            });
 
-        $('#disable-user-btn').click(function () {
-            var userId = $('#disable-user-id').val();
-            var reason = $('#disable-reason').val();
-            disableUser(userId, reason);
-        });
+            $('#enableUserBtn').click(function () {
+            var userId = $(this).data('user-id');
+            enableUser(userId);
+            });
 
-        function disableUser(userId, reason) {
+            function enableUser(userId) {
             var form = $('<form>').attr({
                 method: 'post',
-                action: '/Admin/DisableUser',
+                action: '/Admin/EnableUser',
                 style: 'display: none;'
-        });
+            });
 
             $('<input>').attr({
                 type: 'hidden',
@@ -340,79 +372,47 @@
                 value: userId
             }).appendTo(form);
 
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'reason',
-                value: reason
-            }).appendTo(form);
-
             form.appendTo('body').submit();
-        }
+            }
 
-        $('.enable-user').click(function () {
-        var userId = $(this).data('user-id');
-        $('#enableUserBtn').attr('data-user-id', userId);
-        });
+            function openEditModal(user) {
+                console.log(user);
+                $('#edit-uid').val(user.uid);
+                $('#edit-username').val(user.userName);
+                $('#edit-fullname').val(user.fullName);
+                $('#edit-address').val(user.address);
+                $('#edit-email').val(user.email);
+                $('#edit-phone').val(user.phone);
+                $('#edit-role').val(user.roleId);
+                $('#editModal').modal('show');
+            }
 
-        $('#enableUserBtn').click(function () {
-        var userId = $(this).data('user-id');
-        enableUser(userId);
-        });
+            function submitEditForm() {
+                var form = $('#edit-user-form');
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        $('#editModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            }
 
-        function enableUser(userId) {
-        var form = $('<form>').attr({
-            method: 'post',
-            action: '/Admin/EnableUser',
-            style: 'display: none;'
-        });
-
-        $('<input>').attr({
-            type: 'hidden',
-            name: 'userId',
-            value: userId
-        }).appendTo(form);
-
-        form.appendTo('body').submit();
-        }
-
-        function openEditModal(user) {
-            console.log(user);
-            $('#edit-uid').val(user.uid);
-            $('#edit-username').val(user.userName);
-            $('#edit-fullname').val(user.fullName);
-            $('#edit-address').val(user.address);
-            $('#edit-email').val(user.email);
-            $('#edit-phone').val(user.phone);
-            $('#edit-role').val(user.roleId);
-            $('#editModal').modal('show');
-        }
-
-        function submitEditForm() {
-            var form = $('#edit-user-form');
-            $.ajax({
-                url: form.attr('action'),
-                type: form.attr('method'),
-                data: form.serialize(),
-                success: function (response) {
-                    $('#editModal').modal('hide');
-                    location.reload();
-                },
-                error: function (xhr, status, error) {
-                    console.log(error);
-                }
+            $(document).on('click', '.edit-user-btn', function () {
+                var user = $(this).data('user');
+                openEditModal(user);
             });
-        }
 
-        $(document).on('click', '.edit-user-btn', function () {
-            var user = $(this).data('user');
-            openEditModal(user);
+            // Event listener for the form submission
+            $('#edit-user-form').on('submit', function (event) {
+                event.preventDefault();
+                submitEditForm();
+            });
         });
-
-        // Event listener for the form submission
-        $('#edit-user-form').on('submit', function (event) {
-            event.preventDefault();
-            submitEditForm();
-        });
-    });
-</script>
+    </script>
 }
